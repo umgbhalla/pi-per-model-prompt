@@ -39,7 +39,7 @@ describe("extension entry", () => {
     expect(handlers.get("before_agent_start")).toHaveLength(1);
   });
 
-  it("augments the system prompt for matching models", async () => {
+  it("augments the system prompt with the harness core and matching model layers", async () => {
     const { pi, handlers } = createFakePi();
     perModelPrompt(pi as never);
 
@@ -52,6 +52,7 @@ describe("extension entry", () => {
     );
 
     expect(result).toBeDefined();
+    expect(result?.systemPrompt).toContain("## Pi Harness Core Append (Pi)");
     expect(result?.systemPrompt).toContain("## OpenAI GPT-5 Family Base (Pi)");
     expect(result?.systemPrompt).toContain("## OpenAI GPT-5 Codex Base (Pi)");
     expect(result?.systemPrompt).toContain("## GPT-5.4 Delta (Pi)");
@@ -68,11 +69,12 @@ describe("extension entry", () => {
     );
 
     expect(result).toBeDefined();
+    expect(result?.systemPrompt).toContain("## Pi Harness Core Append (Pi)");
     expect(result?.systemPrompt).toContain("## Anthropic Claude Family Base (Pi)");
     expect(result?.systemPrompt).toContain("## Anthropic Claude Coding Agent (Pi)");
   });
 
-  it("does nothing for non-target models", async () => {
+  it("augments the system prompt with the harness core for non-target models", async () => {
     const { pi, handlers } = createFakePi();
     perModelPrompt(pi as never);
 
@@ -82,7 +84,8 @@ describe("extension entry", () => {
       { model: { id: "mistral-large" } },
     );
 
-    expect(result).toBeUndefined();
+    expect(result).toBeDefined();
+    expect(result?.systemPrompt).toContain("## Pi Harness Core Append (Pi)");
   });
 
   it("remains idempotent when Claude markers already exist", async () => {
@@ -92,6 +95,8 @@ describe("extension entry", () => {
     const handler = handlers.get("before_agent_start")?.[0];
     const alreadyLayeredPrompt = [
       "BASE",
+      "## Pi Harness Core Append (Pi)",
+      "core",
       "## Anthropic Claude Family Base (Pi)",
       "family",
       "## Anthropic Claude Coding Agent (Pi)",
@@ -104,6 +109,7 @@ describe("extension entry", () => {
     );
 
     expect(result).toBeUndefined();
+    expect(countOccurrences(alreadyLayeredPrompt, "## Pi Harness Core Append (Pi)")).toBe(1);
     expect(countOccurrences(alreadyLayeredPrompt, "## Anthropic Claude Family Base (Pi)")).toBe(1);
   });
 
@@ -114,6 +120,8 @@ describe("extension entry", () => {
     const handler = handlers.get("before_agent_start")?.[0];
     const alreadyLayeredPrompt = [
       "BASE",
+      "## Pi Harness Core Append (Pi)",
+      "core",
       "## OpenAI GPT-5 Family Base (Pi)",
       "family",
       "## OpenAI GPT-5 Codex Base (Pi)",
@@ -128,6 +136,7 @@ describe("extension entry", () => {
     );
 
     expect(result).toBeUndefined();
+    expect(countOccurrences(alreadyLayeredPrompt, "## Pi Harness Core Append (Pi)")).toBe(1);
     expect(countOccurrences(alreadyLayeredPrompt, "## GPT-5.4 Delta (Pi)")).toBe(1);
   });
 });

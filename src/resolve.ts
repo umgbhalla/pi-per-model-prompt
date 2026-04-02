@@ -1,6 +1,7 @@
 import type { ExtensionContext } from "@mariozechner/pi-coding-agent";
 import type { PromptLayer } from "./prompt.js";
 import { inspectModelIdentity } from "./model-identity.js";
+import { HARNESS_CORE_LAYER } from "./layers/base.js";
 import { GPT5_CODEX_LAYER } from "./layers/openai/gpt5/codex.js";
 import { GPT54_LAYER } from "./layers/openai/gpt5/gpt-5.4.js";
 import { GPT53_CODEX_LAYER } from "./layers/openai/gpt5/gpt-5.3-codex.js";
@@ -11,11 +12,12 @@ import { CLAUDE_CODING_AGENT_LAYER } from "./layers/anthropic/claude/coding-agen
 export type ModelContext = Pick<ExtensionContext, "model">;
 
 export function resolveLayersForModelId(modelId?: string): PromptLayer[] {
+  const layers: PromptLayer[] = [HARNESS_CORE_LAYER];
   const identity = inspectModelIdentity(modelId);
-  if (!identity) return [];
+  if (!identity) return layers;
 
   if (identity.family === "gpt-5") {
-    const layers: PromptLayer[] = [GPT5_FAMILY_LAYER];
+    layers.push(GPT5_FAMILY_LAYER);
 
     if (identity.tags.has("codex")) {
       layers.push(GPT5_CODEX_LAYER);
@@ -37,10 +39,11 @@ export function resolveLayersForModelId(modelId?: string): PromptLayer[] {
   }
 
   if (identity.family === "claude") {
-    return [CLAUDE_FAMILY_LAYER, CLAUDE_CODING_AGENT_LAYER];
+    layers.push(CLAUDE_FAMILY_LAYER, CLAUDE_CODING_AGENT_LAYER);
+    return layers;
   }
 
-  return [];
+  return layers;
 }
 
 export function resolveLayers(ctx: ModelContext): PromptLayer[] {

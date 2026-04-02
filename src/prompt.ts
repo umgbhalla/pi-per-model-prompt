@@ -1,6 +1,6 @@
 export type PromptLayerMeta = {
   target: string;
-  purpose: "correction";
+  purpose: "baseline" | "correction";
   fixes: string[];
   nonGoals?: string[];
 };
@@ -26,8 +26,15 @@ export function joinSections(...sections: Array<string | undefined>): string {
   return sections.filter(Boolean).join("\n\n");
 }
 
+export function hasMarker(systemPrompt: string, marker: string): boolean {
+  // Match marker at line start to avoid false positives from user content
+  // that happens to contain the marker text mid-line.
+  return systemPrompt.startsWith(marker)
+    || systemPrompt.includes(`\n${marker}`);
+}
+
 export function appendOnce(systemPrompt: string, layer: PromptLayer): string {
-  if (systemPrompt.includes(layer.marker)) return systemPrompt;
+  if (hasMarker(systemPrompt, layer.marker)) return systemPrompt;
   return `${systemPrompt}\n\n${layer.marker}\n\n${layer.content}`;
 }
 
