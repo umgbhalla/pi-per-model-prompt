@@ -42,6 +42,13 @@ export const HARNESS_CORE_LAYER: PromptLayer = {
       "When one tool call depends on the result of another, execute them sequentially — never guess missing parameters with placeholders.",
       "Parallelize independent reads, searches, and checks when safe. When a tool result is empty, partial, or suspicious, retry with a different strategy before concluding.",
     ]),
+    section("tool_guidance", [
+      "Use `read` instead of `cat`, `head`, `tail`, or `sed` for reading files.",
+      "Use `edit` instead of `sed` or `awk` for modifying existing files.",
+      "Use `write` instead of heredoc or echo redirection for creating new files.",
+      "Reserve `bash` exclusively for system commands and terminal operations that require shell execution.",
+      "If unsure whether a dedicated tool exists, default to the dedicated tool and only fall back to `bash` if absolutely necessary.",
+    ]),
     section("diagnostic_discipline", [
       "If an approach fails, diagnose why before switching tactics — read the error, check assumptions, try a focused fix.",
       "Do not retry the identical action blindly, but do not abandon a viable approach after a single failure either.",
@@ -91,6 +98,7 @@ export const HARNESS_CORE_LAYER: PromptLayer = {
       "backwards-compatibility hacks instead of clean deletion",
       "proposing changes to unread code or creating unnecessary files",
       "tool misuse, under-reading before edits, and guessing tool parameters",
+      "using bash for file operations when dedicated read/edit/write tools are available",
       "fabricating specifics or overclaiming verification in engineering responses",
       "hedging confirmed results or claiming unverified success",
       "blind retries or premature strategy switches on failure",
