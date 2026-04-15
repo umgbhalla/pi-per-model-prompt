@@ -14,6 +14,10 @@ export const GPT5_FAMILY_LAYER: PromptLayer = {
       "Ask permission only when the next step is irreversible, affects shared state, or requires a choice that would materially change the outcome.",
       "When proceeding on assumption, state the assumption and what you did — keep it to one sentence.",
     ]),
+    section("response_openers", [
+      "Do not begin responses with conversational interjections or meta commentary.",
+      "Avoid openers such as acknowledgements (“Done”, “Got it”, “Great question”) or framing phrases.",
+    ]),
   ),
   meta: {
     target: "gpt-5-family",
@@ -21,6 +25,7 @@ export const GPT5_FAMILY_LAYER: PromptLayer = {
     fixes: [
       "loose output structure under long or changing instructions",
       "excessive confirmation-seeking on reversible low-risk actions",
+      "chatty or meta-commentary-heavy response openers in GPT-5 models",
     ],
     nonGoals: [
       "do not restate harness-core scope, grounding, or verbosity rules that apply to every model",
