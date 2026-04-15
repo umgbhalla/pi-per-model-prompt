@@ -23,7 +23,8 @@ On top of that, the package targets two model families used inside Pi:
 - `gpt-5*` → GPT-5 family baseline layer
 - `gpt-5.*-codex` → adds Codex-line coding corrections
 - `gpt-5.4*` → adds GPT-5.4 execution/follow-through delta
-- `gpt-5.3-codex` → adds exact-model verbosity/ambiguity delta
+- exact selected model `gpt-5.4` → forces Responses API `text.verbosity = "low"` at runtime via `before_provider_request`
+- `gpt-5.3-codex` → adds exact-model compact answer-shape / ambiguity delta
 
 **Anthropic Claude**
 
@@ -65,7 +66,7 @@ pi --no-extensions -e /path/to/pi-per-model-prompt/index.ts
 
 ```text
 index.ts                                   # package entry declared in package.json -> pi.extensions
-src/index.ts                               # extension implementation; registers before_agent_start hook
+src/index.ts                               # extension implementation; registers before_agent_start + before_provider_request hooks
 src/model-identity.ts                      # model id parser (gpt-5*, claude-*)
 src/resolve.ts                             # layer resolution by family/version/tags
 src/prompt.ts                              # prompt composition helpers

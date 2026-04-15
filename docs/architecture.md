@@ -20,11 +20,12 @@ This keeps the package cheap to audit, easy to publish, and easy to evolve with 
 ## Runtime flow
 
 1. Pi loads `index.ts` from the package manifest.
-2. `src/index.ts` registers a `before_agent_start` hook.
-3. On each prompt, the hook inspects `ctx.model.id`.
+2. `src/index.ts` registers a `before_agent_start` hook and a `before_provider_request` hook.
+3. On each prompt, the start hook inspects `ctx.model.id`.
 4. `src/resolve.ts` composes matching layers in deterministic order.
 5. `src/prompt.ts` appends each layer once by marker (line-start matching to avoid false positives).
-6. If nothing changes, the hook returns `undefined` and leaves the system prompt untouched.
+6. For the exact selected model `gpt-5.4`, the provider-request hook patches outgoing Responses-style payloads to set `text.verbosity = "low"`, including Azure deployment-alias payloads.
+7. If nothing changes, the hooks return `undefined` and leave the prompt or payload untouched.
 
 ## Composition model
 
@@ -32,7 +33,7 @@ Resolution is additive rather than branch-based.
 
 ### Design principle: strong base, narrow deltas
 
-The harness core carries **all cross-model coding contracts** — scope discipline, output efficiency, context-before-edit, grounded implementation, tool discipline, diagnostic discipline, verification and faithful reporting, collaborator mindset, code security, actions-with-care, git safety, and user update discipline. Many of these rules are adapted from battle-tested Claude Code harness rules and apply equally to all model families. Family and model layers carry **only model-specific corrections** that the base cannot cover. This avoids duplicating the same rules across multiple family/model layers.
+The harness core carries **all cross-model coding contracts** — scope discipline, output efficiency, context-before-edit, grounded implementation, tool discipline, diagnostic discipline, verification and faithful reporting, collaborator mindset, code security, actions-with-care, git safety, and user update discipline. Many of these rules are adapted from battle-tested Claude Code harness rules and apply equally to all model families. Family and model layers carry **only model-specific corrections** that the base cannot cover. Runtime request overrides stay separate and narrowly scoped to provider payload details such as model-specific verbosity hints.
 
 ### Prompt cache constraint
 
@@ -65,13 +66,13 @@ This layer carries the cross-model coding contracts that should hold even when n
 Current order:
 
 1. shared harness core (`HARNESS_CORE_LAYER`)
-2. family layer (`GPT5_FAMILY_LAYER`) — output structure, follow-through policy
-3. model-line layer (`GPT5_CODEX_LAYER`, if `codex` tag present) — implementation reporting, scope reinforcement
-4. version or exact-model layer (`GPT54_LAYER` or `GPT53_CODEX_LAYER`)
+2. family layer (`GPT5_FAMILY_LAYER`) — output structure, follow-through policy, no meta-commentary openers
+3. model-line layer (`GPT5_CODEX_LAYER`, if `codex` tag present) — scope reinforcement
+4. version or exact-model layer (`GPT54_LAYER` or `GPT53_CODEX_LAYER`) — official-style answer shape and model-specific corrections
 
 Examples:
 
-- `gpt-5.4` → `HARNESS_CORE` + `GPT5_FAMILY` + `GPT54`
+- `gpt-5.4` → `HARNESS_CORE` + `GPT5_FAMILY` + `GPT54`, plus runtime `text.verbosity = "low"` on Responses-style requests
 - `gpt-5.4-codex` → `HARNESS_CORE` + `GPT5_FAMILY` + `GPT5_CODEX` + `GPT54`
 - `gpt-5.3-codex` → `HARNESS_CORE` + `GPT5_FAMILY` + `GPT5_CODEX` + `GPT53_CODEX`
 
@@ -93,15 +94,15 @@ This order matters because the broader baseline should land before narrower corr
 
 ```
 index.ts                               # package entry (re-exports src/index.ts)
-src/index.ts                           # Pi extension entry; registers before_agent_start hook
+src/index.ts                           # Pi extension entry; registers before_agent_start + before_provider_request hooks
 src/model-identity.ts                  # parser for gpt-5*, claude-*; produces ModelIdentity
 src/resolve.ts                         # deterministic layer resolution by family/version/tags
 src/prompt.ts                          # PromptLayer types, section/prose builders, appendOnce, hasMarker
 src/layers/base.ts                     # shared harness-core append layer (strong baseline for all models)
-src/layers/openai/gpt5/family.ts       # GPT-5 family baseline (output contract, follow-through policy)
-src/layers/openai/gpt5/codex.ts        # GPT-5 Codex line (implementation reporting, scope reinforcement)
-src/layers/openai/gpt5/gpt-5.4.ts     # GPT-5.4 delta (autonomy, response economy, tool persistence)
-src/layers/openai/gpt5/gpt-5.3-codex.ts # GPT-5.3-Codex delta (verbosity spec, ambiguity handling)
+src/layers/openai/gpt5/family.ts       # GPT-5 family baseline (output contract, follow-through policy, no meta-commentary openers)
+src/layers/openai/gpt5/codex.ts        # GPT-5 Codex line (scope reinforcement)
+src/layers/openai/gpt5/gpt-5.4.ts     # GPT-5.4 delta (autonomy, no-fluff interaction style, official-style answer shape)
+src/layers/openai/gpt5/gpt-5.3-codex.ts # GPT-5.3-Codex delta (official-style compact answer shape, ambiguity handling)
 src/layers/anthropic/claude/family.ts  # Claude family baseline (XML, thinking discipline, long-context attention)
 src/layers/anthropic/claude/coding-agent.ts # Claude coding-agent delta (comment discipline, implementation reporting)
 test/model-identity.test.ts            # parser coverage for supported and unsupported ids
