@@ -2,7 +2,6 @@ import type { ExtensionContext } from "@mariozechner/pi-coding-agent";
 import type { PromptLayer } from "./prompt.js";
 import { inspectModelIdentity } from "./model-identity.js";
 import { HARNESS_CORE_LAYER } from "./layers/base.js";
-import { GPT5_CODEX_LAYER } from "./layers/openai/gpt5/codex.js";
 import { GPT54_LAYER } from "./layers/openai/gpt5/gpt-5.4.js";
 import { GPT53_CODEX_LAYER } from "./layers/openai/gpt5/gpt-5.3-codex.js";
 import { GPT5_FAMILY_LAYER } from "./layers/openai/gpt5/family.js";
@@ -18,10 +17,6 @@ export function resolveLayersForModelId(modelId?: string): PromptLayer[] {
 
   if (identity.family === "gpt-5") {
     layers.push(GPT5_FAMILY_LAYER);
-
-    if (identity.tags.has("codex")) {
-      layers.push(GPT5_CODEX_LAYER);
-    }
 
     if (identity.version?.major === 5 && identity.version.minor === 4) {
       layers.push(GPT54_LAYER);

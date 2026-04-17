@@ -49,13 +49,12 @@ describe("resolveLayersForModelId", () => {
     ]);
   });
 
-  it("resolves codex layers in deterministic order", () => {
+  it("resolves the GPT-5.4-codex stack without separate codex layer", () => {
     const markers = resolveLayersForModelId("gpt-5.4-codex").map((layer) => layer.marker);
 
     expect(markers).toEqual([
       "## Pi Harness Core Append (Pi)",
       "## OpenAI GPT-5 Family Base (Pi)",
-      "## OpenAI GPT-5 Codex Base (Pi)",
       "## GPT-5.4 Delta (Pi)",
     ]);
   });
@@ -66,7 +65,6 @@ describe("resolveLayersForModelId", () => {
     expect(markers).toEqual([
       "## Pi Harness Core Append (Pi)",
       "## OpenAI GPT-5 Family Base (Pi)",
-      "## OpenAI GPT-5 Codex Base (Pi)",
       "## GPT-5.3 Codex Delta (Pi)",
     ]);
   });

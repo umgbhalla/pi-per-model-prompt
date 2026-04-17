@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.1] — 2026-04-17
+
+### Refactors
+- simplify shared harness, GPT-5, GPT-5.4, and Claude prompt layers by collapsing redundant guidance and tightening wording
+- remove the separate `OpenAI GPT-5 Codex Base` layer and resolve GPT-5 codex variants through family plus version-specific layers only
+
+### Tests
+- update resolver and extension coverage to reflect the new GPT-5 layer stack and prompt expectations
+
+### Other
+- bump package version from `0.3.0` to `0.3.1`
+
 ## [0.3.0] — 2026-04-15
 
 ### Features

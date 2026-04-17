@@ -54,7 +54,6 @@ describe("extension entry", () => {
     expect(result).toBeDefined();
     expect(result?.systemPrompt).toContain("## Pi Harness Core Append (Pi)");
     expect(result?.systemPrompt).toContain("## OpenAI GPT-5 Family Base (Pi)");
-    expect(result?.systemPrompt).toContain("## OpenAI GPT-5 Codex Base (Pi)");
     expect(result?.systemPrompt).toContain("## GPT-5.4 Delta (Pi)");
   });
 
@@ -124,8 +123,6 @@ describe("extension entry", () => {
       "core",
       "## OpenAI GPT-5 Family Base (Pi)",
       "family",
-      "## OpenAI GPT-5 Codex Base (Pi)",
-      "codex",
       "## GPT-5.4 Delta (Pi)",
       "delta",
     ].join("\n\n");
