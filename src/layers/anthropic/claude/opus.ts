@@ -29,10 +29,11 @@ export const CLAUDE_OPUS_LAYER: PromptLayer = {
     ]),
     section("loop_stop_rule", [
       "If you are about to call the same tool a third time in a row with similar arguments, stop. Summarize in one sentence what you learned from the prior calls, then either batch the next several calls, switch tools, or state the next distinct step — do not call that tool again until you have.",
-      "Explore with intent. After 5 file reads without an edit, write, or committed answer, write a one-paragraph plan and commit to an action. If the task does not need code changes, say so and return. Do not exceed 10 reads in a session without producing output.",
+      "Explore with intent. After 5 file reads without an edit, write, or committed answer, either produce output or fan the exploration out to a subagent swarm (see subagent_contract). Serial reads past 8 are the wrong tool for broad codebase exploration — they are only correct when the task is narrow and the next file you need is obvious.",
     ]),
     section("subagent_contract", [
       "Every subagent launch must include a narrow verifiable deliverable, a hard step or time budget, and the expected output format. No open-ended 'go explore X' delegations.",
+      "When the task is broad codebase exploration (learning a new repo, mapping a feature across many files, auditing a large surface), prefer agent_group or branch with 3–5 subagents over partitioned file sets instead of reading serially. Each subagent gets a disjoint slice and returns structured findings; you integrate them.",
       "While a subagent runs, do useful independent work in parallel rather than idling. On return, do not restate the subagent's output — integrate it and move to the next step.",
     ]),
     section("closing_brevity", [
