@@ -18,23 +18,31 @@ describe("resolveLayersForModelId", () => {
     ]);
   });
 
-  it("resolves the Claude layer stack", () => {
-    const markers = resolveLayersForModelId("claude-sonnet-4-5-20250514").map((layer) => layer.marker);
-
-    expect(markers).toEqual([
-      "## Pi Harness Core Append (Pi)",
-      "## Anthropic Claude Family Base (Pi)",
-      "## Anthropic Claude Coding Agent (Pi)",
-    ]);
-  });
-
-  it("resolves Claude for all series variants", () => {
-    for (const id of ["claude-opus-4-6", "claude-haiku-4-5-20251001", "opus-4-6"]) {
+  it("resolves the Claude layer stack for non-opus series", () => {
+    for (const id of ["claude-sonnet-4-5-20250514", "claude-haiku-4-5-20251001"]) {
       const markers = resolveLayersForModelId(id).map((layer) => layer.marker);
       expect(markers).toEqual([
         "## Pi Harness Core Append (Pi)",
         "## Anthropic Claude Family Base (Pi)",
         "## Anthropic Claude Coding Agent (Pi)",
+      ]);
+      expect(markers).not.toContain("## Anthropic Claude Opus Delta (Pi)");
+    }
+  });
+
+  it("adds the Opus delta for every Opus id form", () => {
+    for (const id of [
+      "claude-opus-4-6",
+      "claude-opus-4-7",
+      "opus-4-6",
+      "anthropic/claude-opus-4.7",
+    ]) {
+      const markers = resolveLayersForModelId(id).map((layer) => layer.marker);
+      expect(markers).toEqual([
+        "## Pi Harness Core Append (Pi)",
+        "## Anthropic Claude Family Base (Pi)",
+        "## Anthropic Claude Coding Agent (Pi)",
+        "## Anthropic Claude Opus Delta (Pi)",
       ]);
     }
   });

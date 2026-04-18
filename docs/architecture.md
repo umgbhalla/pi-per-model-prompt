@@ -78,15 +78,16 @@ Examples:
 
 ### Anthropic Claude
 
-All Claude models receive a fixed three-layer stack regardless of series:
+All Claude models receive at least three layers, with an additional series delta for Opus:
 
 1. shared harness core (`HARNESS_CORE_LAYER`)
 2. family layer (`CLAUDE_FAMILY_LAYER`) — XML preference, thinking discipline, long-context attention
 3. coding-agent layer (`CLAUDE_CODING_AGENT_LAYER`) — comment discipline, implementation reporting
+4. series delta (`CLAUDE_OPUS_LAYER`, only when `series === "opus"`) — Opus-specific corrections observed in Sentry traces: parallel tool_use preference, bash role, bash exit-code semantics, edit preconditions/shape, loop stop rule, subagent contract, closing brevity
 
 Detection is based on the presence of `opus`, `sonnet`, or `haiku` in the model ID.
 
-Most Claude Code harness rules (output efficiency, actions-with-care, git safety, faithful reporting, collaborator mindset) have been promoted to the shared harness core since they apply equally to all model families. The Claude-specific layers now only carry rules for Claude's unique tendencies: over-commenting, reasoning exposition, XML structure preference, and long-context positional bias.
+Most Claude Code harness rules (output efficiency, actions-with-care, git safety, faithful reporting, collaborator mindset) have been promoted to the shared harness core since they apply equally to all model families. The Claude-specific family and coding-agent layers carry rules for every Claude series. The Opus delta is kept separate because the underlying behaviors (tool thrashing, stale oldText, read spiral, bloated closing recap) were observed specifically on long Opus agent sessions and do not apply to Sonnet or Haiku in the same shape.
 
 This order matters because the broader baseline should land before narrower corrections.
 
@@ -105,6 +106,7 @@ src/layers/openai/gpt5/gpt-5.4.ts     # GPT-5.4 delta (autonomy, no-fluff intera
 src/layers/openai/gpt5/gpt-5.3-codex.ts # GPT-5.3-Codex delta (official-style compact answer shape, ambiguity handling)
 src/layers/anthropic/claude/family.ts  # Claude family baseline (XML, thinking discipline, long-context attention)
 src/layers/anthropic/claude/coding-agent.ts # Claude coding-agent delta (comment discipline, implementation reporting)
+src/layers/anthropic/claude/opus.ts    # Claude Opus series delta (observed-failure corrections: tool_use batching, bash role, edit preconditions, loop stop, subagent contract, closing brevity)
 test/model-identity.test.ts            # parser coverage for supported and unsupported ids
 test/prompt.test.ts                    # helper behavior and append idempotence
 test/resolve.test.ts                   # exact layer ordering and model matching

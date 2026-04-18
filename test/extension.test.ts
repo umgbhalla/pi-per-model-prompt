@@ -71,6 +71,24 @@ describe("extension entry", () => {
     expect(result?.systemPrompt).toContain("## Pi Harness Core Append (Pi)");
     expect(result?.systemPrompt).toContain("## Anthropic Claude Family Base (Pi)");
     expect(result?.systemPrompt).toContain("## Anthropic Claude Coding Agent (Pi)");
+    expect(result?.systemPrompt).not.toContain("## Anthropic Claude Opus Delta (Pi)");
+  });
+
+  it("adds the Opus delta for Opus models", async () => {
+    const { pi, handlers } = createFakePi();
+    perModelPrompt(pi as never);
+
+    const handler = handlers.get("before_agent_start")?.[0];
+    const result = await handler!(
+      { systemPrompt: "BASE" },
+      { model: { id: "claude-opus-4-7" } },
+    );
+
+    expect(result).toBeDefined();
+    expect(result?.systemPrompt).toContain("## Pi Harness Core Append (Pi)");
+    expect(result?.systemPrompt).toContain("## Anthropic Claude Family Base (Pi)");
+    expect(result?.systemPrompt).toContain("## Anthropic Claude Coding Agent (Pi)");
+    expect(result?.systemPrompt).toContain("## Anthropic Claude Opus Delta (Pi)");
   });
 
   it("augments the system prompt with the harness core for non-target models", async () => {
@@ -100,6 +118,8 @@ describe("extension entry", () => {
       "family",
       "## Anthropic Claude Coding Agent (Pi)",
       "coding-agent",
+      "## Anthropic Claude Opus Delta (Pi)",
+      "opus",
     ].join("\n\n");
 
     const result = await handler!(
@@ -110,6 +130,7 @@ describe("extension entry", () => {
     expect(result).toBeUndefined();
     expect(countOccurrences(alreadyLayeredPrompt, "## Pi Harness Core Append (Pi)")).toBe(1);
     expect(countOccurrences(alreadyLayeredPrompt, "## Anthropic Claude Family Base (Pi)")).toBe(1);
+    expect(countOccurrences(alreadyLayeredPrompt, "## Anthropic Claude Opus Delta (Pi)")).toBe(1);
   });
 
   it("remains idempotent when markers already exist", async () => {

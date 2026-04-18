@@ -29,6 +29,7 @@ On top of that, the package targets two model families used inside Pi:
 **Anthropic Claude**
 
 - `*claude*` (any id containing `opus`, `sonnet`, or `haiku`) → Claude family baseline + coding-agent layer
+- `*opus*` → additionally adds the Opus series delta (tool_use batching, bash role, edit preconditions, loop stop rule, subagent contract, closing brevity)
 
 Layer composition is additive. For example:
 
@@ -37,6 +38,7 @@ Layer composition is additive. For example:
 - `gpt-5.4-codex` → `HARNESS_CORE` + `GPT5_FAMILY` + `GPT5_CODEX` + `GPT54`
 - `gpt-5.3-codex` → `HARNESS_CORE` + `GPT5_FAMILY` + `GPT5_CODEX` + `GPT53_CODEX`
 - `claude-sonnet-4-5` → `HARNESS_CORE` + `CLAUDE_FAMILY` + `CLAUDE_CODING_AGENT`
+- `claude-opus-4-7` → `HARNESS_CORE` + `CLAUDE_FAMILY` + `CLAUDE_CODING_AGENT` + `CLAUDE_OPUS`
 
 Each layer is appended once via a unique marker, so repeated turns or partial prompt reuse stay idempotent.
 
@@ -77,6 +79,7 @@ src/layers/openai/gpt5/gpt-5.4.ts         # GPT-5.4 delta
 src/layers/openai/gpt5/gpt-5.3-codex.ts   # GPT-5.3-Codex delta
 src/layers/anthropic/claude/family.ts      # Claude family baseline
 src/layers/anthropic/claude/coding-agent.ts # Claude coding-agent layer
+src/layers/anthropic/claude/opus.ts         # Claude Opus series delta
 test/*.test.ts                             # coverage for parsing, composition, resolution, extension hook
 ```
 

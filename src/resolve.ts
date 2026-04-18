@@ -7,6 +7,7 @@ import { GPT53_CODEX_LAYER } from "./layers/openai/gpt5/gpt-5.3-codex.js";
 import { GPT5_FAMILY_LAYER } from "./layers/openai/gpt5/family.js";
 import { CLAUDE_FAMILY_LAYER } from "./layers/anthropic/claude/family.js";
 import { CLAUDE_CODING_AGENT_LAYER } from "./layers/anthropic/claude/coding-agent.js";
+import { CLAUDE_OPUS_LAYER } from "./layers/anthropic/claude/opus.js";
 
 export type ModelContext = Pick<ExtensionContext, "model">;
 
@@ -35,6 +36,9 @@ export function resolveLayersForModelId(modelId?: string): PromptLayer[] {
 
   if (identity.family === "claude") {
     layers.push(CLAUDE_FAMILY_LAYER, CLAUDE_CODING_AGENT_LAYER);
+    if (identity.series === "opus") {
+      layers.push(CLAUDE_OPUS_LAYER);
+    }
     return layers;
   }
 
