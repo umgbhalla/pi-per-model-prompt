@@ -66,15 +66,17 @@ This layer carries the cross-model coding contracts that should hold even when n
 Current order:
 
 1. shared harness core (`HARNESS_CORE_LAYER`)
-2. family layer (`GPT5_FAMILY_LAYER`) — output structure, follow-through policy, no meta-commentary openers
-3. model-line layer (`GPT5_CODEX_LAYER`, if `codex` tag present) — scope reinforcement
-4. version or exact-model layer (`GPT54_LAYER` or `GPT53_CODEX_LAYER`) — official-style answer shape and model-specific corrections
+2. family layer (`GPT5_FAMILY_LAYER`) — follow-through policy, no meta-commentary openers, parallel tool_use, bash discipline, edit preconditions/shape, loop stop rule, subagent concurrency
+3. model-line layer (`GPT5_CODEX_LAYER`, only when `codex` tag present) — reasoning-to-action ratio, artifact-vs-inline, code-search routing
+4. version or exact-model layer (`GPT54_LAYER` or `GPT53_CODEX_LAYER`) — exact-model corrections
 
 Examples:
 
 - `gpt-5.4` → `HARNESS_CORE` + `GPT5_FAMILY` + `GPT54`, plus runtime `text.verbosity = "low"` on Responses-style requests
 - `gpt-5.4-codex` → `HARNESS_CORE` + `GPT5_FAMILY` + `GPT5_CODEX` + `GPT54`
 - `gpt-5.3-codex` → `HARNESS_CORE` + `GPT5_FAMILY` + `GPT5_CODEX` + `GPT53_CODEX`
+
+The family-layer additions (parallel tool_use, bash discipline, edit preconditions, edit shape, loop stop, subagent concurrency) are evidence-driven from 14 days of Sentry agent traces on `gpt-5.4` (4.4k calls) and `gpt-5.3-codex` (2.2k calls). They target the same underlying tool-orchestration failure modes observed on Opus, but are kept at the family level here rather than promoted to harness-core because Haiku and Sonnet data is too thin to conclude they apply universally.
 
 ### Anthropic Claude
 
@@ -100,10 +102,10 @@ src/model-identity.ts                  # parser for gpt-5*, claude-*; produces M
 src/resolve.ts                         # deterministic layer resolution by family/version/tags
 src/prompt.ts                          # PromptLayer types, section/prose builders, appendOnce, hasMarker
 src/layers/base.ts                     # shared harness-core append layer (strong baseline for all models)
-src/layers/openai/gpt5/family.ts       # GPT-5 family baseline (output contract, follow-through policy, no meta-commentary openers)
-src/layers/openai/gpt5/codex.ts        # GPT-5 Codex line (scope reinforcement)
-src/layers/openai/gpt5/gpt-5.4.ts     # GPT-5.4 delta (autonomy, no-fluff interaction style, official-style answer shape)
-src/layers/openai/gpt5/gpt-5.3-codex.ts # GPT-5.3-Codex delta (official-style compact answer shape, ambiguity handling)
+src/layers/openai/gpt5/family.ts       # GPT-5 family baseline (follow-through policy, response openers, parallel tool_use, bash discipline, edit preconditions/shape, loop stop, subagent concurrency)
+src/layers/openai/gpt5/codex.ts        # GPT-5 Codex line (reasoning-to-action ratio, artifact-vs-inline, code-search routing)
+src/layers/openai/gpt5/gpt-5.4.ts     # GPT-5.4 delta (autonomy, conciseness, split tool_persistence, closing brevity)
+src/layers/openai/gpt5/gpt-5.3-codex.ts # GPT-5.3-Codex delta (compact answer shape with artifact guard, anti-fabrication)
 src/layers/anthropic/claude/family.ts  # Claude family baseline (XML, thinking discipline, long-context attention)
 src/layers/anthropic/claude/coding-agent.ts # Claude coding-agent delta (comment discipline, implementation reporting)
 src/layers/anthropic/claude/opus.ts    # Claude Opus series delta (observed-failure corrections: tool_use batching, bash role, edit preconditions, loop stop, subagent contract, closing brevity)

@@ -47,7 +47,7 @@ describe("resolveLayersForModelId", () => {
     }
   });
 
-  it("resolves the GPT-5.4 baseline stack", () => {
+  it("resolves the GPT-5.4 baseline stack (no codex layer without -codex tag)", () => {
     const markers = resolveLayersForModelId("gpt-5.4").map((layer) => layer.marker);
 
     expect(markers).toEqual([
@@ -55,25 +55,35 @@ describe("resolveLayersForModelId", () => {
       "## OpenAI GPT-5 Family Base (Pi)",
       "## GPT-5.4 Delta (Pi)",
     ]);
+    expect(markers).not.toContain("## OpenAI GPT-5 Codex Line (Pi)");
   });
 
-  it("resolves the GPT-5.4-codex stack without separate codex layer", () => {
+  it("adds the codex line layer for gpt-5.4-codex between family and exact-model deltas", () => {
     const markers = resolveLayersForModelId("gpt-5.4-codex").map((layer) => layer.marker);
 
     expect(markers).toEqual([
       "## Pi Harness Core Append (Pi)",
       "## OpenAI GPT-5 Family Base (Pi)",
+      "## OpenAI GPT-5 Codex Line (Pi)",
       "## GPT-5.4 Delta (Pi)",
     ]);
   });
 
-  it("adds the exact-model delta for gpt-5.3-codex", () => {
+  it("adds the codex line layer and exact-model delta for gpt-5.3-codex", () => {
     const markers = resolveLayersForModelId("gpt-5.3-codex").map((layer) => layer.marker);
 
     expect(markers).toEqual([
       "## Pi Harness Core Append (Pi)",
       "## OpenAI GPT-5 Family Base (Pi)",
+      "## OpenAI GPT-5 Codex Line (Pi)",
       "## GPT-5.3 Codex Delta (Pi)",
     ]);
+  });
+
+  it("does not add the codex line layer for non-codex gpt-5 variants", () => {
+    for (const id of ["gpt-5.4", "gpt-5.4-mini", "gpt-5"]) {
+      const markers = resolveLayersForModelId(id).map((layer) => layer.marker);
+      expect(markers).not.toContain("## OpenAI GPT-5 Codex Line (Pi)");
+    }
   });
 });

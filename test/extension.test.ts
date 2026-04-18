@@ -54,7 +54,25 @@ describe("extension entry", () => {
     expect(result).toBeDefined();
     expect(result?.systemPrompt).toContain("## Pi Harness Core Append (Pi)");
     expect(result?.systemPrompt).toContain("## OpenAI GPT-5 Family Base (Pi)");
+    expect(result?.systemPrompt).toContain("## OpenAI GPT-5 Codex Line (Pi)");
     expect(result?.systemPrompt).toContain("## GPT-5.4 Delta (Pi)");
+  });
+
+  it("adds the codex line layer for gpt-5.3-codex", async () => {
+    const { pi, handlers } = createFakePi();
+    perModelPrompt(pi as never);
+
+    const handler = handlers.get("before_agent_start")?.[0];
+    const result = await handler!(
+      { systemPrompt: "BASE" },
+      { model: { id: "gpt-5.3-codex" } },
+    );
+
+    expect(result).toBeDefined();
+    expect(result?.systemPrompt).toContain("## Pi Harness Core Append (Pi)");
+    expect(result?.systemPrompt).toContain("## OpenAI GPT-5 Family Base (Pi)");
+    expect(result?.systemPrompt).toContain("## OpenAI GPT-5 Codex Line (Pi)");
+    expect(result?.systemPrompt).toContain("## GPT-5.3 Codex Delta (Pi)");
   });
 
   it("augments the system prompt for Claude models", async () => {
@@ -144,6 +162,8 @@ describe("extension entry", () => {
       "core",
       "## OpenAI GPT-5 Family Base (Pi)",
       "family",
+      "## OpenAI GPT-5 Codex Line (Pi)",
+      "codex-line",
       "## GPT-5.4 Delta (Pi)",
       "delta",
     ].join("\n\n");
@@ -155,6 +175,7 @@ describe("extension entry", () => {
 
     expect(result).toBeUndefined();
     expect(countOccurrences(alreadyLayeredPrompt, "## Pi Harness Core Append (Pi)")).toBe(1);
+    expect(countOccurrences(alreadyLayeredPrompt, "## OpenAI GPT-5 Codex Line (Pi)")).toBe(1);
     expect(countOccurrences(alreadyLayeredPrompt, "## GPT-5.4 Delta (Pi)")).toBe(1);
   });
 });

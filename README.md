@@ -20,11 +20,11 @@ On top of that, the package targets two model families used inside Pi:
 
 **OpenAI GPT-5**
 
-- `gpt-5*` → GPT-5 family baseline layer
-- `gpt-5.*-codex` → adds Codex-line coding corrections
-- `gpt-5.4*` → adds GPT-5.4 execution/follow-through delta
+- `gpt-5*` → GPT-5 family baseline layer (parallel tool_use, bash discipline, edit preconditions, edit shape, loop stop rule, subagent concurrency — evidence-driven from 14d Sentry traces)
+- `gpt-5.*-codex` → adds Codex-line corrections (reasoning-to-action ratio, artifact-vs-inline, code-search routing)
+- `gpt-5.4*` → adds GPT-5.4 execution/follow-through delta with closing-brevity and split tool-persistence
 - exact selected model `gpt-5.4` → forces Responses API `text.verbosity = "low"` at runtime via `before_provider_request`
-- `gpt-5.3-codex` → adds exact-model compact answer-shape / ambiguity delta
+- `gpt-5.3-codex` → adds exact-model compact answer-shape (with artifact guard) and anti-fabrication rule
 
 **Anthropic Claude**
 
@@ -73,8 +73,8 @@ src/model-identity.ts                      # model id parser (gpt-5*, claude-*)
 src/resolve.ts                             # layer resolution by family/version/tags
 src/prompt.ts                              # prompt composition helpers
 src/layers/base.ts                         # all-model harness-core append layer
-src/layers/openai/gpt5/family.ts           # GPT-5 family baseline
-src/layers/openai/gpt5/codex.ts            # GPT-5 Codex line layer
+src/layers/openai/gpt5/family.ts           # GPT-5 family baseline (tool-discipline reinforcement)
+src/layers/openai/gpt5/codex.ts            # GPT-5 Codex line layer (reasoning-to-action, artifacts, search routing)
 src/layers/openai/gpt5/gpt-5.4.ts         # GPT-5.4 delta
 src/layers/openai/gpt5/gpt-5.3-codex.ts   # GPT-5.3-Codex delta
 src/layers/anthropic/claude/family.ts      # Claude family baseline
